@@ -41,14 +41,8 @@ interface AuthState {
 // ERROR HELPER
 // ==========================
 
-const getErrorMessage = (
-  error: unknown,
-  fallback: string,
-): string => {
-  if (
-    typeof error === "object" &&
-    error !== null
-  ) {
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (typeof error === "object" && error !== null) {
     const axiosError = error as {
       response?: {
         data?: {
@@ -59,15 +53,13 @@ const getErrorMessage = (
       message?: unknown;
     };
 
-    const responseMessage =
-      axiosError.response?.data?.message;
+    const responseMessage = axiosError.response?.data?.message;
 
     if (typeof responseMessage === "string") {
       return responseMessage;
     }
 
-    const responseError =
-      axiosError.response?.data?.error;
+    const responseError = axiosError.response?.data?.error;
 
     if (typeof responseError === "string") {
       return responseError;
@@ -91,10 +83,7 @@ const getStoredUser = (): AuthUser | null => {
 
     return user ? JSON.parse(user) : null;
   } catch (error) {
-    console.error(
-      "Failed to parse stored user:",
-      error,
-    );
+    console.error("Failed to parse stored user:", error);
 
     localStorage.removeItem("user");
 
@@ -121,24 +110,17 @@ export const registerUser = createAsyncThunk<
   {
     rejectValue: string;
   }
->(
-  "auth/register",
-  async (userData, thunkAPI) => {
-    try {
-      const response =
-        await authService.register(userData);
+>("auth/register", async (userData, thunkAPI) => {
+  try {
+    const response = await authService.register(userData);
 
-      return response;
-    } catch (error: unknown) {
-      return thunkAPI.rejectWithValue(
-        getErrorMessage(
-          error,
-          "Registration failed",
-        ),
-      );
-    }
-  },
-);
+    return response;
+  } catch (error: unknown) {
+    return thunkAPI.rejectWithValue(
+      getErrorMessage(error, "Registration failed"),
+    );
+  }
+});
 
 // ==========================
 // LOGIN
@@ -150,24 +132,24 @@ export const loginUser = createAsyncThunk<
   {
     rejectValue: string;
   }
->(
-  "auth/login",
-  async (userData, thunkAPI) => {
-    try {
-      const response =
-        await authService.login(userData);
+>("auth/login", async (userData, thunkAPI) => {
+  console.log("LOGIN THUNK START:", {
+    identifier: userData.identifier,
+    hasPassword: !!userData.password,
+  });
 
-      return response;
-    } catch (error: unknown) {
-      return thunkAPI.rejectWithValue(
-        getErrorMessage(
-          error,
-          "Login failed",
-        ),
-      );
-    }
-  },
-);
+  try {
+    const response = await authService.login(userData);
+
+    console.log("LOGIN THUNK SUCCESS:", response);
+
+    return response;
+  } catch (error: unknown) {
+    console.error("LOGIN THUNK ERROR:", error);
+
+    return thunkAPI.rejectWithValue(getErrorMessage(error, "Login failed"));
+  }
+});
 
 // ==========================
 // RESET PASSWORD
@@ -179,31 +161,19 @@ export const resetPassword = createAsyncThunk<
   {
     rejectValue: string;
   }
->(
-  "auth/resetPassword",
-  async (data, thunkAPI) => {
-    try {
-      const response =
-        await authService.resetPassword(
-          data.token,
-          data.password,
-        );
+>("auth/resetPassword", async (data, thunkAPI) => {
+  try {
+    const response = await authService.resetPassword(data.token, data.password);
 
-      const message =
-        response?.message ||
-        "Password reset successfully";
+    const message = response?.message || "Password reset successfully";
 
-      return message;
-    } catch (error: unknown) {
-      return thunkAPI.rejectWithValue(
-        getErrorMessage(
-          error,
-          "Failed to reset password",
-        ),
-      );
-    }
-  },
-);
+    return message;
+  } catch (error: unknown) {
+    return thunkAPI.rejectWithValue(
+      getErrorMessage(error, "Failed to reset password"),
+    );
+  }
+});
 
 // ==========================
 // SLICE
@@ -246,10 +216,7 @@ const authSlice = createSlice({
     // UPDATE USER
     // ==========================
 
-    setUser: (
-      state,
-      action: PayloadAction<Partial<AuthUser>>,
-    ) => {
+    setUser: (state, action: PayloadAction<Partial<AuthUser>>) => {
       if (!state.user) {
         return;
       }
@@ -259,10 +226,7 @@ const authSlice = createSlice({
         ...action.payload,
       };
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(state.user),
-      );
+      localStorage.setItem("user", JSON.stringify(state.user));
     },
   },
 
@@ -277,168 +241,112 @@ const authSlice = createSlice({
       // REGISTER - PENDING
       // ==========================
 
-      .addCase(
-        registerUser.pending,
-        (state) => {
-          state.isLoading = true;
-          state.isSuccess = false;
-          state.isError = false;
-          state.message = "";
-        },
-      )
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
+        state.message = "";
+      })
 
       // ==========================
       // REGISTER - SUCCESS
       // ==========================
 
-      .addCase(
-        registerUser.fulfilled,
-        (state, action) => {
-          state.isLoading = false;
-          state.isSuccess = true;
-          state.isError = false;
-          state.message =
-            "Registration successful";
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        state.message = "Registration successful";
 
-          state.user = action.payload;
-          state.token =
-            action.payload.token ?? null;
+        state.user = action.payload;
+        state.token = action.payload.token ?? null;
 
-          localStorage.setItem(
-            "user",
-            JSON.stringify(action.payload),
-          );
+        localStorage.setItem("user", JSON.stringify(action.payload));
 
-          if (action.payload.token) {
-            localStorage.setItem(
-              "token",
-              action.payload.token,
-            );
-          }
-        },
-      )
+        if (action.payload.token) {
+          localStorage.setItem("token", action.payload.token);
+        }
+      })
 
       // ==========================
       // REGISTER - ERROR
       // ==========================
 
-      .addCase(
-        registerUser.rejected,
-        (state, action) => {
-          state.isLoading = false;
-          state.isSuccess = false;
-          state.isError = true;
-          state.message =
-            action.payload ||
-            "Registration failed";
-        },
-      )
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.isError = true;
+        state.message = action.payload || "Registration failed";
+      })
 
-      // ==========================
-      // LOGIN - PENDING
-      // ==========================
+      .addCase(loginUser.pending, (state) => {
+        console.log("REDUX LOGIN: PENDING");
 
-      .addCase(
-        loginUser.pending,
-        (state) => {
-          state.isLoading = true;
-          state.isSuccess = false;
-          state.isError = false;
-          state.message = "";
-        },
-      )
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
+        state.message = "";
+      })
 
-      // ==========================
-      // LOGIN - SUCCESS
-      // ==========================
+      .addCase(loginUser.fulfilled, (state, action) => {
+        console.log("REDUX LOGIN: FULFILLED", action.payload);
 
-      .addCase(
-        loginUser.fulfilled,
-        (state, action) => {
-          state.isLoading = false;
-          state.isSuccess = true;
-          state.isError = false;
-          state.message =
-            "Login successful";
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        state.message = "Login successful";
 
-          state.user = action.payload;
-          state.token =
-            action.payload.token ?? null;
+        state.user = action.payload;
+        state.token = action.payload.token ?? null;
 
-          localStorage.setItem(
-            "user",
-            JSON.stringify(action.payload),
-          );
+        localStorage.setItem("user", JSON.stringify(action.payload));
 
-          if (action.payload.token) {
-            localStorage.setItem(
-              "token",
-              action.payload.token,
-            );
-          }
-        },
-      )
+        if (action.payload.token) {
+          localStorage.setItem("token", action.payload.token);
+        }
+      })
 
-      // ==========================
-      // LOGIN - ERROR
-      // ==========================
+      .addCase(loginUser.rejected, (state, action) => {
+        console.log("REDUX LOGIN: REJECTED", action.payload);
 
-      .addCase(
-        loginUser.rejected,
-        (state, action) => {
-          state.isLoading = false;
-          state.isSuccess = false;
-          state.isError = true;
-          state.message =
-            action.payload ||
-            "Login failed";
-        },
-      )
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.isError = true;
+        state.message = action.payload || "Login failed";
+      })
 
       // ==========================
       // RESET PASSWORD - PENDING
       // ==========================
 
-      .addCase(
-        resetPassword.pending,
-        (state) => {
-          state.isLoading = true;
-          state.isSuccess = false;
-          state.isError = false;
-          state.message = "";
-        },
-      )
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
+        state.message = "";
+      })
 
       // ==========================
       // RESET PASSWORD - SUCCESS
       // ==========================
 
-      .addCase(
-        resetPassword.fulfilled,
-        (state, action) => {
-          state.isLoading = false;
-          state.isSuccess = true;
-          state.isError = false;
-          state.message =
-            action.payload;
-        },
-      )
+      .addCase(resetPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        state.message = action.payload;
+      })
 
       // ==========================
       // RESET PASSWORD - ERROR
       // ==========================
 
-      .addCase(
-        resetPassword.rejected,
-        (state, action) => {
-          state.isLoading = false;
-          state.isSuccess = false;
-          state.isError = true;
-          state.message =
-            action.payload ||
-            "Failed to reset password";
-        },
-      );
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.isError = true;
+        state.message = action.payload || "Failed to reset password";
+      });
   },
 });
 
@@ -446,11 +354,7 @@ const authSlice = createSlice({
 // ACTIONS
 // ==========================
 
-export const {
-  reset,
-  logout,
-  setUser,
-} = authSlice.actions;
+export const { reset, logout, setUser } = authSlice.actions;
 
 // ==========================
 // REDUCER
