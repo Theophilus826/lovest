@@ -42,19 +42,7 @@ const saveAuth = (data: any): AuthUser => {
     throw new Error("Authentication token was not returned.");
   }
 
-  /*
-   * Your backend returns isAdmin directly:
-   *
-   * {
-   *   _id,
-   *   name,
-   *   email,
-   *   isAdmin,
-   *   token
-   * }
-   *
-   * We also support role if it exists.
-   */
+  
 
   const user: AuthUser = {
     _id: String(data._id),
@@ -122,12 +110,23 @@ const register = async (userData: RegisterData) => {
 ========================================== */
 
 const login = async (userData: LoginData) => {
+  console.log("LOGIN REQUEST:", {
+    identifier: userData.identifier,
+    hasPassword: !!userData.password,
+  });
+
   const { data } = await API.post(
     API_URL + "login",
     userData
   );
 
-  return saveAuth(data);
+  console.log("LOGIN RESPONSE:", data);
+
+  const user = saveAuth(data);
+
+  console.log("LOGIN SAVED USER:", user);
+
+  return user;
 };
 
 /* ==========================================

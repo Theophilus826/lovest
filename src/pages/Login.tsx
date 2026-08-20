@@ -3,7 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import { loginUser, reset } from "../services/AuthSlice";
+import { loginUser } from "../services/AuthSlice";
 import { useAppDispatch, useAppSelector } from "../layout/hooks";
 
 export default function Login() {
@@ -18,43 +18,67 @@ export default function Login() {
     (state) => state.auth
   );
 
+  // ==========================
+  // LOGIN ERROR
+  // ==========================
   useEffect(() => {
     if (isError && message) {
       toast.error(message);
     }
+  }, [isError, message]);
 
+  // ==========================
+  // LOGIN SUCCESS
+  // ==========================
+  useEffect(() => {
     if (user) {
       toast.success("Login successful");
-      navigate("/");
+      navigate("/", { replace: true });
     }
+  }, [user, navigate]);
 
-    dispatch(reset());
-  }, [user, isError, message, dispatch, navigate]);
-
+  // ==========================
+  // SUBMIT
+  // ==========================
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!identifier.trim() || !password.trim()) {
+    const cleanIdentifier = identifier.trim();
+
+    if (!cleanIdentifier || !password) {
       toast.error("Please enter your email/phone and password");
       return;
     }
 
     dispatch(
       loginUser({
-        identifier: identifier.trim(),
+        identifier: cleanIdentifier,
         password,
       })
     );
   };
 
+  // ==========================
+  // LOADING
+  // ==========================
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-lg font-semibold">Logging in...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-gray-700">
+            Logging in...
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            Please wait
+          </p>
+        </div>
       </div>
     );
   }
 
+  // ==========================
+  // LOGIN FORM
+  // ==========================
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
@@ -74,6 +98,7 @@ export default function Login() {
             onChange={(e) => setIdentifier(e.target.value)}
             className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
             autoComplete="username"
+            disabled={isLoading}
           />
 
           <div className="relative">
@@ -84,12 +109,19 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 outline-none focus:border-orange-500"
               autoComplete="current-password"
+              disabled={isLoading}
             />
 
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
               className="absolute right-3 top-1/2 -translate-y-1/2"
+              aria-label={
+                showPassword
+                  ? "Hide password"
+                  : "Show password"
+              }
+              disabled={isLoading}
             >
               {showPassword ? (
                 <EyeOff size={20} />
@@ -109,6 +141,7 @@ export default function Login() {
         </form>
 
         <button
+          type="button"
           onClick={() => navigate("/forgot-password")}
           className="mt-4 w-full text-center text-sm text-orange-500 hover:underline"
         >
@@ -118,6 +151,7 @@ export default function Login() {
         <p className="mt-6 text-center text-sm">
           Don't have an account?{" "}
           <button
+            type="button"
             onClick={() => navigate("/register")}
             className="font-semibold text-orange-500 hover:underline"
           >
