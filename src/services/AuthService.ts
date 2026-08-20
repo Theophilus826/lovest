@@ -38,46 +38,149 @@ interface RegisterData {
 ========================================== */
 
 const saveAuth = (data: any): AuthUser => {
-  if (!data?.token) {
-    throw new Error("Authentication token was not returned.");
+  console.log("========== SAVE AUTH ==========");
+  console.log("SAVE AUTH DATA:", data);
+
+  // ==========================================
+  // CHECK RESPONSE
+  // ==========================================
+
+  if (!data) {
+    console.error("❌ SAVE AUTH: No response data");
+
+    throw new Error(
+      "No authentication response received.",
+    );
   }
 
-  
+  if (!data.token) {
+    console.error(
+      "❌ SAVE AUTH: Token missing",
+      data,
+    );
+
+    throw new Error(
+      "Authentication token was not returned.",
+    );
+  }
+
+  if (!data._id) {
+    console.error(
+      "❌ SAVE AUTH: User ID missing",
+      data,
+    );
+
+    throw new Error(
+      "User ID was not returned.",
+    );
+  }
+
+  // ==========================================
+  // BUILD USER
+  // ==========================================
+
+  const isAdmin =
+    data.isAdmin === true ||
+    data.role === "admin";
 
   const user: AuthUser = {
     _id: String(data._id),
-    name: data.name || "User",
+
+    name:
+      typeof data.name === "string" &&
+      data.name.trim()
+        ? data.name
+        : "User",
+
     email: data.email ?? null,
+
     phone: data.phone ?? null,
+
     avatar: data.avatar ?? null,
-    token: data.token,
 
-    // IMPORTANT
-    isAdmin:
-      data.isAdmin === true ||
-      data.role === "admin",
+    token: String(data.token),
 
-    role:
-      data.isAdmin === true ||
-      data.role === "admin"
-        ? "admin"
-        : "user",
+    isAdmin,
 
-    coins: data.coins ?? 0,
-    isVerified: data.isVerified ?? false,
-    online: data.online ?? false,
+    role: isAdmin
+      ? "admin"
+      : "user",
+
+    coins:
+      typeof data.coins === "number"
+        ? data.coins
+        : 0,
+
+    isVerified:
+      data.isVerified === true,
+
+    online:
+      data.online === true,
+
     createdAt: data.createdAt,
+
     updatedAt: data.updatedAt,
   };
 
-  localStorage.setItem("token", user.token);
-  localStorage.setItem("user", JSON.stringify(user));
+  // ==========================================
+  // SAVE TOKEN
+  // ==========================================
 
-  // Keep this if other parts of your app use userId
-  localStorage.setItem("userId", user._id);
+  localStorage.setItem(
+    "token",
+    user.token,
+  );
 
-  console.log("AUTH SAVED:", user);
-  console.log("AUTH IS ADMIN:", user.isAdmin);
+  // ==========================================
+  // SAVE USER
+  // ==========================================
+
+  localStorage.setItem(
+    "user",
+    JSON.stringify(user),
+  );
+
+  // ==========================================
+  // SAVE USER ID
+  // ==========================================
+
+  localStorage.setItem(
+    "userId",
+    user._id,
+  );
+
+  // ==========================================
+  // VERIFY STORAGE
+  // ==========================================
+
+  console.log(
+    "✅ AUTH SAVED:",
+    user,
+  );
+
+  console.log(
+    "✅ TOKEN SAVED:",
+    localStorage.getItem("token"),
+  );
+
+  console.log(
+    "✅ USER SAVED:",
+    localStorage.getItem("user"),
+  );
+
+  console.log(
+    "✅ USER ID SAVED:",
+    localStorage.getItem("userId"),
+  );
+
+  console.log(
+    "✅ IS ADMIN:",
+    user.isAdmin,
+  );
+
+  console.log(
+    "========== SAVE AUTH COMPLETE ==========",
+  );
 
   return user;
 };

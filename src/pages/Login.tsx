@@ -1,10 +1,31 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 
-import { loginUser } from "../services/AuthSlice";
-import { useAppDispatch, useAppSelector } from "../layout/hooks";
+import {
+  Eye,
+  EyeOff,
+} from "lucide-react";
+
+import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  toast,
+} from "react-toastify";
+
+import {
+  loginUser,
+  reset,
+} from "../services/AuthSlice";
+
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../layout/hooks";
 
 export default function Login() {
   const [identifier, setIdentifier] = useState("");
@@ -14,61 +35,131 @@ export default function Login() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { user, isLoading, isError, message } = useAppSelector(
-    (state) => state.auth
-  );
+  const {
+    user,
+    isLoading,
+    isSuccess,
+    isError,
+    message,
+  } = useAppSelector((state) => state.auth);
 
-  // ==========================
-  // LOGIN ERROR
-  // ==========================
-  useEffect(() => {
-    if (isError && message) {
-      toast.error(message);
-    }
-  }, [isError, message]);
+  // ==========================================
+  // LOGIN RESULT
+  // ==========================================
 
-  // ==========================
-  // LOGIN SUCCESS
-  // ==========================
   useEffect(() => {
-    if (user) {
+    console.log("LOGIN STATE:", {
+      user,
+      isLoading,
+      isSuccess,
+      isError,
+      message,
+    });
+
+    if (isSuccess && user) {
+      console.log("LOGIN SUCCESS - NAVIGATING HOME");
+
       toast.success("Login successful");
-      navigate("/", { replace: true });
-    }
-  }, [user, navigate]);
 
-  // ==========================
+      // Reset AFTER successful login state has been processed
+      dispatch(reset());
+
+      navigate("/", {
+        replace: true,
+      });
+
+      return;
+    }
+
+    if (isError && message) {
+      console.error("LOGIN ERROR:", message);
+
+      toast.error(message);
+
+      dispatch(reset());
+    }
+  }, [
+    user,
+    isSuccess,
+    isError,
+    message,
+    dispatch,
+    navigate,
+  ]);
+
+  // ==========================================
   // SUBMIT
-  // ==========================
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // ==========================================
+
+  const handleSubmit = async (
+    e: FormEvent<HTMLFormElement>,
+  ) => {
     e.preventDefault();
 
     const cleanIdentifier = identifier.trim();
 
     if (!cleanIdentifier || !password) {
-      toast.error("Please enter your email/phone and password");
+      toast.error(
+        "Please enter your email/phone and password",
+      );
+
       return;
     }
 
-    dispatch(
-      loginUser({
-        identifier: cleanIdentifier,
-        password,
-      })
-    );
+    console.log("LOGIN SUBMIT:", {
+      identifier: cleanIdentifier,
+      hasPassword: !!password,
+    });
+
+    try {
+      const result = await dispatch(
+        loginUser({
+          identifier: cleanIdentifier,
+          password,
+        }),
+      ).unwrap();
+
+      console.log(
+        "LOGIN RESULT FROM THUNK:",
+        result,
+      );
+
+      console.log(
+        "TOKEN SAVED:",
+        localStorage.getItem("token"),
+      );
+
+      console.log(
+        "USER SAVED:",
+        localStorage.getItem("user"),
+      );
+
+      // Navigation is handled by the useEffect
+    } catch (error) {
+      console.error(
+        "LOGIN THUNK FAILED:",
+        error,
+      );
+    }
   };
 
-  // ==========================
+  // ==========================================
   // LOADING
-  // ==========================
+  // ==========================================
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
         <div className="text-center">
-          <p className="text-lg font-semibold text-gray-700">
+          <div className="mb-4 text-3xl">
+            🔐
+          </div>
+
+          <p className="text-lg font-semibold">
             Logging in...
           </p>
-          <p className="mt-1 text-sm text-gray-500">
+
+          <p className="mt-2 text-sm text-gray-500">
             Please wait
           </p>
         </div>
@@ -76,12 +167,14 @@ export default function Login() {
     );
   }
 
-  // ==========================
-  // LOGIN FORM
-  // ==========================
+  // ==========================================
+  // FORM
+  // ==========================================
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+
         <h1 className="mb-2 text-center text-3xl font-bold text-orange-500">
           Lovest
         </h1>
@@ -90,23 +183,40 @@ export default function Login() {
           Welcome back
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5"
+        >
+
+          {/* IDENTIFIER */}
+
           <input
             type="text"
             placeholder="Email or Phone Number"
             value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            onChange={(e) =>
+              setIdentifier(e.target.value)
+            }
             className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
             autoComplete="username"
             disabled={isLoading}
           />
 
+          {/* PASSWORD */}
+
           <div className="relative">
+
             <input
-              type={showPassword ? "text" : "password"}
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
               className="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 outline-none focus:border-orange-500"
               autoComplete="current-password"
               disabled={isLoading}
@@ -114,13 +224,12 @@ export default function Login() {
 
             <button
               type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-              aria-label={
-                showPassword
-                  ? "Hide password"
-                  : "Show password"
+              onClick={() =>
+                setShowPassword(
+                  (prev) => !prev,
+                )
               }
+              className="absolute right-3 top-1/2 -translate-y-1/2"
               disabled={isLoading}
             >
               {showPassword ? (
@@ -129,35 +238,51 @@ export default function Login() {
                 <Eye size={20} />
               )}
             </button>
+
           </div>
+
+          {/* LOGIN BUTTON */}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-orange-500 py-3 font-semibold text-white transition hover:bg-orange-600 disabled:bg-gray-400"
+            className="w-full rounded-xl bg-orange-500 py-3 font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
-            {isLoading ? "Logging in..." : "Login"}
+            {isLoading
+              ? "Logging in..."
+              : "Login"}
           </button>
+
         </form>
+
+        {/* FORGOT PASSWORD */}
 
         <button
           type="button"
-          onClick={() => navigate("/forgot-password")}
+          onClick={() =>
+            navigate("/forgot-password")
+          }
           className="mt-4 w-full text-center text-sm text-orange-500 hover:underline"
         >
           Forgot Password?
         </button>
 
+        {/* REGISTER */}
+
         <p className="mt-6 text-center text-sm">
           Don't have an account?{" "}
+
           <button
             type="button"
-            onClick={() => navigate("/register")}
+            onClick={() =>
+              navigate("/register")
+            }
             className="font-semibold text-orange-500 hover:underline"
           >
             Register
           </button>
         </p>
+
       </div>
     </div>
   );
