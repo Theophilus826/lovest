@@ -110,23 +110,34 @@ const register = async (userData: RegisterData) => {
 ========================================== */
 
 const login = async (userData: LoginData) => {
-  console.log("LOGIN REQUEST:", {
+  console.log("1. LOGIN REQUEST:", {
     identifier: userData.identifier,
     hasPassword: !!userData.password,
   });
 
-  const { data } = await API.post(
-    API_URL + "login",
-    userData
-  );
+  try {
+    const response = await API.post(
+      API_URL + "login",
+      userData
+    );
 
-  console.log("LOGIN RESPONSE:", data);
+    console.log("2. LOGIN RESPONSE STATUS:", response.status);
+    console.log("3. LOGIN RESPONSE DATA:", response.data);
 
-  const user = saveAuth(data);
+    const user = saveAuth(response.data);
 
-  console.log("LOGIN SAVED USER:", user);
+    console.log("4. AUTH SAVED:", user);
 
-  return user;
+    return user;
+  } catch (error: any) {
+    console.error("5. LOGIN ERROR:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+
+    throw error;
+  }
 };
 
 /* ==========================================
