@@ -2,7 +2,6 @@ import {
 FaUser,
 FaShoppingBag,
 FaHeart,
-FaMapMarkerAlt,
 FaCreditCard,
 FaCog,
 FaSignOutAlt,
