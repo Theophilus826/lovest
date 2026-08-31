@@ -1,29 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  FaArrowLeft,
-  FaCheckCircle,
-  FaShoppingCart,
-} from "react-icons/fa";
+import { FaArrowLeft, FaCheckCircle, FaShoppingCart } from "react-icons/fa";
 
 import API from "../services/Api";
 import { useCart } from "../context/CartContext";
 
-type PurchaseType =
-  | "FULL_PAYMENT"
-  | "CONTRIBUTION"
-  | "LOAN"
-  | "RESELLER";
+type PurchaseType = "FULL_PAYMENT" | "CONTRIBUTION" | "LOAN" | "RESELLER";
 
 export default function Checkout() {
   const navigate = useNavigate();
 
-  const {
-    cart,
-    totalItems,
-    subtotal,
-    removeItem,
-  } = useCart();
+  const { cart, totalItems, subtotal, removeItem } = useCart();
 
   // =====================================
   // FORM
@@ -45,8 +32,7 @@ export default function Checkout() {
   const [purchaseType, setPurchaseType] =
     useState<PurchaseType>("FULL_PAYMENT");
 
-  const [contributionPhases, setContributionPhases] =
-    useState<number>(4);
+  const [contributionPhases, setContributionPhases] = useState<number>(4);
 
   const [deposit, setDeposit] = useState<string>("");
 
@@ -70,16 +56,11 @@ export default function Checkout() {
   // =====================================
 
   const phaseAmount =
-    contributionPhases > 0
-      ? total / contributionPhases
-      : total;
+    contributionPhases > 0 ? total / contributionPhases : total;
 
   const loanDeposit = Number(deposit || 0);
 
-  const loanAmount = Math.max(
-    total - loanDeposit,
-    0
-  );
+  const loanAmount = Math.max(total - loanDeposit, 0);
 
   // =====================================
   // HANDLE CUSTOMER CHANGE
@@ -88,7 +69,7 @@ export default function Checkout() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
 
@@ -102,9 +83,7 @@ export default function Checkout() {
   // HANDLE PURCHASE TYPE
   // =====================================
 
-  const handlePurchaseTypeChange = (
-    type: PurchaseType
-  ) => {
+  const handlePurchaseTypeChange = (type: PurchaseType) => {
     setPurchaseType(type);
 
     setError("");
@@ -118,9 +97,7 @@ export default function Checkout() {
   // PLACE PURCHASE
   // =====================================
 
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setError("");
@@ -166,7 +143,7 @@ export default function Checkout() {
 
     if (cart.length !== 1) {
       setError(
-        "Please checkout with one product at a time when using a purchase plan."
+        "Please checkout with one product at a time when using a purchase plan.",
       );
       return;
     }
@@ -179,9 +156,7 @@ export default function Checkout() {
 
     if (purchaseType === "CONTRIBUTION") {
       if (![4, 6, 7].includes(contributionPhases)) {
-        setError(
-          "Contribution plan must be 4, 6, or 7 phases."
-        );
+        setError("Contribution plan must be 4, 6, or 7 phases.");
         return;
       }
     }
@@ -191,18 +166,13 @@ export default function Checkout() {
     // =====================================
 
     if (purchaseType === "LOAN") {
-      if (
-        Number.isNaN(loanDeposit) ||
-        loanDeposit < 0
-      ) {
+      if (Number.isNaN(loanDeposit) || loanDeposit < 0) {
         setError("Please enter a valid loan deposit.");
         return;
       }
 
       if (loanDeposit >= total) {
-        setError(
-          "Loan deposit must be less than the total amount."
-        );
+        setError("Loan deposit must be less than the total amount.");
         return;
       }
     }
@@ -232,8 +202,7 @@ export default function Checkout() {
       // =====================================
 
       if (purchaseType === "CONTRIBUTION") {
-        payload.contributionPhases =
-          contributionPhases;
+        payload.contributionPhases = contributionPhases;
       }
 
       // =====================================
@@ -248,17 +217,13 @@ export default function Checkout() {
       // CREATE PURCHASE
       // =====================================
 
-      const response = await API.post(
-        "/purchase",
-        payload
-      );
+      const response = await API.post("/purchase", payload);
 
-      const purchase =
-        response.data?.data;
+      const purchase = response.data?.data;
 
       if (!purchase?._id) {
         throw new Error(
-          "Purchase was created but no purchase ID was returned."
+          "Purchase was created but no purchase ID was returned.",
         );
       }
 
@@ -266,10 +231,7 @@ export default function Checkout() {
       // SAVE PURCHASE ID
       // =====================================
 
-      sessionStorage.setItem(
-        "lastPurchaseId",
-        purchase._id
-      );
+      sessionStorage.setItem("lastPurchaseId", purchase._id);
 
       // =====================================
       // CLEAR CART
@@ -281,19 +243,14 @@ export default function Checkout() {
       // GO TO PURCHASE SUCCESS
       // =====================================
 
-      navigate(
-        `/purchase-success/${purchase._id}`
-      );
+      navigate(`/purchase-success/${purchase._id}`);
     } catch (error: any) {
-      console.error(
-        "Failed to create purchase:",
-        error
-      );
+      console.error("Failed to create purchase:", error);
 
       setError(
         error?.response?.data?.message ||
           error?.message ||
-          "Failed to create your purchase. Please try again."
+          "Failed to create your purchase. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -316,9 +273,7 @@ export default function Checkout() {
               <FaArrowLeft />
             </Link>
 
-            <h1 className="text-xl font-bold text-gray-900">
-              Checkout
-            </h1>
+            <h1 className="text-xl font-bold text-gray-900">Checkout</h1>
           </div>
         </header>
 
@@ -365,15 +320,10 @@ export default function Checkout() {
           </Link>
 
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Checkout
-            </h1>
+            <h1 className="text-xl font-bold text-gray-900">Checkout</h1>
 
             <p className="text-xs text-gray-500">
-              {totalItems}{" "}
-              {totalItems === 1
-                ? "item"
-                : "items"}
+              {totalItems} {totalItems === 1 ? "item" : "items"}
             </p>
           </div>
         </div>
@@ -452,9 +402,7 @@ export default function Checkout() {
                     className="mb-2 block text-sm font-medium text-gray-700"
                   >
                     Email address
-                    <span className="ml-1 text-xs text-gray-400">
-                      Optional
-                    </span>
+                    <span className="ml-1 text-xs text-gray-400">Optional</span>
                   </label>
 
                   <input
@@ -575,15 +523,8 @@ export default function Checkout() {
                       type="radio"
                       name="purchaseType"
                       value="FULL_PAYMENT"
-                      checked={
-                        purchaseType ===
-                        "FULL_PAYMENT"
-                      }
-                      onChange={() =>
-                        handlePurchaseTypeChange(
-                          "FULL_PAYMENT"
-                        )
-                      }
+                      checked={purchaseType === "FULL_PAYMENT"}
+                      onChange={() => handlePurchaseTypeChange("FULL_PAYMENT")}
                       className="mt-1 h-4 w-4 accent-orange-500"
                     />
 
@@ -615,15 +556,8 @@ export default function Checkout() {
                       type="radio"
                       name="purchaseType"
                       value="CONTRIBUTION"
-                      checked={
-                        purchaseType ===
-                        "CONTRIBUTION"
-                      }
-                      onChange={() =>
-                        handlePurchaseTypeChange(
-                          "CONTRIBUTION"
-                        )
-                      }
+                      checked={purchaseType === "CONTRIBUTION"}
+                      onChange={() => handlePurchaseTypeChange("CONTRIBUTION")}
                       className="mt-1 h-4 w-4 accent-orange-500"
                     />
 
@@ -636,48 +570,39 @@ export default function Checkout() {
                         Split the purchase into manageable payments.
                       </p>
 
-                      {purchaseType ===
-                        "CONTRIBUTION" && (
+                      {purchaseType === "CONTRIBUTION" && (
                         <div className="mt-4">
                           <p className="mb-2 text-xs font-semibold text-gray-700">
                             Choose your contribution plan
                           </p>
 
                           <div className="grid grid-cols-3 gap-2">
-                            {[4, 6, 7].map(
-                              (phase) => (
-                                <button
-                                  key={phase}
-                                  type="button"
-                                  onClick={() =>
-                                    setContributionPhases(
-                                      phase
-                                    )
-                                  }
-                                  className={`rounded-xl border px-3 py-3 text-center transition ${
-                                    contributionPhases ===
-                                    phase
-                                      ? "border-orange-500 bg-orange-500 text-white"
-                                      : "border-gray-200 bg-white text-gray-700 hover:border-orange-300"
+                            {[4, 6, 7].map((phase) => (
+                              <button
+                                key={phase}
+                                type="button"
+                                onClick={() => setContributionPhases(phase)}
+                                className={`rounded-xl border px-3 py-3 text-center transition ${
+                                  contributionPhases === phase
+                                    ? "border-orange-500 bg-orange-500 text-white"
+                                    : "border-gray-200 bg-white text-gray-700 hover:border-orange-300"
+                                }`}
+                              >
+                                <span className="block text-sm font-bold">
+                                  {phase}
+                                </span>
+
+                                <span
+                                  className={`mt-1 block text-[10px] ${
+                                    contributionPhases === phase
+                                      ? "text-orange-100"
+                                      : "text-gray-400"
                                   }`}
                                 >
-                                  <span className="block text-sm font-bold">
-                                    {phase}
-                                  </span>
-
-                                  <span
-                                    className={`mt-1 block text-[10px] ${
-                                      contributionPhases ===
-                                      phase
-                                        ? "text-orange-100"
-                                        : "text-gray-400"
-                                    }`}
-                                  >
-                                    phases
-                                  </span>
-                                </button>
-                              )
-                            )}
+                                  phases
+                                </span>
+                              </button>
+                            ))}
                           </div>
 
                           <div className="mt-3 rounded-xl bg-white p-3">
@@ -688,23 +613,17 @@ export default function Checkout() {
 
                               <span className="font-bold text-gray-900">
                                 ₦
-                                {phaseAmount.toLocaleString(
-                                  undefined,
-                                  {
-                                    maximumFractionDigits: 2,
-                                  }
-                                )}
+                                {phaseAmount.toLocaleString(undefined, {
+                                  maximumFractionDigits: 2,
+                                })}
                               </span>
                             </div>
 
                             <div className="mt-2 flex justify-between text-xs">
-                              <span className="text-gray-500">
-                                Total
-                              </span>
+                              <span className="text-gray-500">Total</span>
 
                               <span className="font-semibold text-gray-900">
-                                ₦
-                                {total.toLocaleString()}
+                                ₦{total.toLocaleString()}
                               </span>
                             </div>
                           </div>
@@ -730,14 +649,8 @@ export default function Checkout() {
                       type="radio"
                       name="purchaseType"
                       value="LOAN"
-                      checked={
-                        purchaseType === "LOAN"
-                      }
-                      onChange={() =>
-                        handlePurchaseTypeChange(
-                          "LOAN"
-                        )
-                      }
+                      checked={purchaseType === "LOAN"}
+                      onChange={() => handlePurchaseTypeChange("LOAN")}
                       className="mt-1 h-4 w-4 accent-orange-500"
                     />
 
@@ -747,11 +660,11 @@ export default function Checkout() {
                       </p>
 
                       <p className="mt-1 text-xs leading-5 text-gray-500">
-                        Pay a deposit and apply to pay the remaining amount over time.
+                        Pay a deposit and apply to pay the remaining amount over
+                        time.
                       </p>
 
-                      {purchaseType ===
-                        "LOAN" && (
+                      {purchaseType === "LOAN" && (
                         <div className="mt-4">
                           <label
                             htmlFor="deposit"
@@ -769,16 +682,9 @@ export default function Checkout() {
                               id="deposit"
                               type="number"
                               min="0"
-                              max={Math.max(
-                                total - 1,
-                                0
-                              )}
+                              max={Math.max(total - 1, 0)}
                               value={deposit}
-                              onChange={(e) =>
-                                setDeposit(
-                                  e.target.value
-                                )
-                              }
+                              onChange={(e) => setDeposit(e.target.value)}
                               placeholder="Enter deposit"
                               className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-8 pr-4 text-sm outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-50"
                             />
@@ -791,19 +697,15 @@ export default function Checkout() {
                               </span>
 
                               <span className="font-semibold text-gray-900">
-                                ₦
-                                {total.toLocaleString()}
+                                ₦{total.toLocaleString()}
                               </span>
                             </div>
 
                             <div className="mt-2 flex justify-between text-xs">
-                              <span className="text-gray-500">
-                                Deposit
-                              </span>
+                              <span className="text-gray-500">Deposit</span>
 
                               <span className="font-semibold text-gray-900">
-                                ₦
-                                {loanDeposit.toLocaleString()}
+                                ₦{loanDeposit.toLocaleString()}
                               </span>
                             </div>
 
@@ -814,15 +716,15 @@ export default function Checkout() {
                                 </span>
 
                                 <span className="font-bold text-orange-500">
-                                  ₦
-                                  {loanAmount.toLocaleString()}
+                                  ₦{loanAmount.toLocaleString()}
                                 </span>
                               </div>
                             </div>
                           </div>
 
                           <p className="mt-2 text-[11px] leading-5 text-gray-400">
-                            Your loan application will require approval before the purchase can proceed.
+                            Your loan application will require approval before
+                            the purchase can proceed.
                           </p>
                         </div>
                       )}
@@ -846,15 +748,8 @@ export default function Checkout() {
                       type="radio"
                       name="purchaseType"
                       value="RESELLER"
-                      checked={
-                        purchaseType ===
-                        "RESELLER"
-                      }
-                      onChange={() =>
-                        handlePurchaseTypeChange(
-                          "RESELLER"
-                        )
-                      }
+                      checked={purchaseType === "RESELLER"}
+                      onChange={() => handlePurchaseTypeChange("RESELLER")}
                       className="mt-1 h-4 w-4 accent-orange-500"
                     />
 
@@ -881,34 +776,21 @@ export default function Checkout() {
             {/* ORDER ITEMS */}
 
             <section className="rounded-2xl bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-gray-900">
-                Your order
-              </h2>
+              <h2 className="text-lg font-bold text-gray-900">Your order</h2>
 
               <div className="mt-4 space-y-4">
                 {cart.map((item) => {
-                  const originalPrice = Number(
-                    item.product.originalPrice || 0
-                  );
+                  const originalPrice = Number(item.product.originalPrice || 0);
 
-                  const sellingPrice = Number(
-                    item.product.price || 0
-                  );
+                  const sellingPrice = Number(item.product.price || 0);
 
                   const hasDiscount =
-                    originalPrice >
-                      sellingPrice &&
-                    originalPrice > 0;
+                    originalPrice > sellingPrice && originalPrice > 0;
 
-                  const itemTotal =
-                    sellingPrice *
-                    item.quantity;
+                  const itemTotal = sellingPrice * item.quantity;
 
                   return (
-                    <div
-                      key={item.product._id}
-                      className="flex gap-3"
-                    >
+                    <div key={item.product._id} className="flex gap-3">
                       <div className="relative shrink-0">
                         {item.product.image ? (
                           <img
@@ -934,22 +816,19 @@ export default function Checkout() {
 
                         <div className="mt-1 flex items-center gap-2">
                           <span className="text-sm font-bold text-orange-500">
-                            ₦
-                            {sellingPrice.toLocaleString()}
+                            ₦{sellingPrice.toLocaleString()}
                           </span>
 
                           {hasDiscount && (
                             <span className="text-xs text-gray-400 line-through">
-                              ₦
-                              {originalPrice.toLocaleString()}
+                              ₦{originalPrice.toLocaleString()}
                             </span>
                           )}
                         </div>
                       </div>
 
                       <p className="shrink-0 text-sm font-bold text-gray-900">
-                        ₦
-                        {itemTotal.toLocaleString()}
+                        ₦{itemTotal.toLocaleString()}
                       </p>
                     </div>
                   );
@@ -980,12 +859,9 @@ export default function Checkout() {
 
                   <span className="font-bold text-orange-600">
                     ₦
-                    {phaseAmount.toLocaleString(
-                      undefined,
-                      {
-                        maximumFractionDigits: 2,
-                      }
-                    )}
+                    {phaseAmount.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}
                     /phase
                   </span>
                 </div>
@@ -1000,24 +876,18 @@ export default function Checkout() {
 
                 <div className="mt-2 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">
-                      Deposit
-                    </span>
+                    <span className="text-gray-500">Deposit</span>
 
                     <span className="font-semibold">
-                      ₦
-                      {loanDeposit.toLocaleString()}
+                      ₦{loanDeposit.toLocaleString()}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-gray-500">
-                      Amount requested
-                    </span>
+                    <span className="text-gray-500">Amount requested</span>
 
                     <span className="font-bold text-orange-600">
-                      ₦
-                      {loanAmount.toLocaleString()}
+                      ₦{loanAmount.toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -1027,42 +897,31 @@ export default function Checkout() {
             {/* SUMMARY */}
 
             <section className="rounded-2xl bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-gray-900">
-                Order summary
-              </h2>
+              <h2 className="text-lg font-bold text-gray-900">Order summary</h2>
 
               <div className="mt-4 space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">
-                    Subtotal
-                  </span>
+                  <span className="text-gray-500">Subtotal</span>
 
                   <span className="font-medium text-gray-900">
-                    ₦
-                    {subtotal.toLocaleString()}
+                    ₦{subtotal.toLocaleString()}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-gray-500">
-                    Delivery
-                  </span>
+                  <span className="text-gray-500">Delivery</span>
 
                   <span className="font-medium text-gray-900">
-                    ₦
-                    {deliveryFee.toLocaleString()}
+                    ₦{deliveryFee.toLocaleString()}
                   </span>
                 </div>
 
                 <div className="border-t border-gray-100 pt-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-900">
-                      Total
-                    </span>
+                    <span className="font-bold text-gray-900">Total</span>
 
                     <span className="text-xl font-bold text-orange-500">
-                      ₦
-                      {total.toLocaleString()}
+                      ₦{total.toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -1084,16 +943,13 @@ export default function Checkout() {
                   <>
                     <FaCheckCircle />
 
-                    {purchaseType ===
-                    "CONTRIBUTION"
+                    {purchaseType === "CONTRIBUTION"
                       ? "Start Contribution"
-                      : purchaseType ===
-                        "LOAN"
-                      ? "Apply for Loan"
-                      : purchaseType ===
-                        "RESELLER"
-                      ? "Start Reseller Purchase"
-                      : "Place Order"}
+                      : purchaseType === "LOAN"
+                        ? "Apply for Loan"
+                        : purchaseType === "RESELLER"
+                          ? "Start Reseller Purchase"
+                          : "Place Order"}
                   </>
                 )}
               </button>
@@ -1104,6 +960,16 @@ export default function Checkout() {
               >
                 Return to Cart
               </Link>
+              <div className="mt-4 text-center text-xs leading-5 text-gray-500">
+                By placing your order, you agree to our{" "}
+                <Link
+                  to="/policies"
+                  className="font-semibold text-orange-500 hover:text-orange-600"
+                >
+                  Shipping, Return, Cancellation and Refund Policies
+                </Link>
+                .
+              </div>
             </section>
           </div>
         </form>

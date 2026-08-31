@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { SearchProvider } from "./context/SearchContext";
@@ -27,10 +26,10 @@ import CategoryProducts from "./pages/CategoryProducts";
 
 import PurchaseSuccess from "./pages/PurchaseSuccess";
 import PurchaseDetails from "./pages/PurchaseDetails";
-
+import Contact from "./pages/Contact";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
-
+import Policies from "./pages/Policies";
 import Notifications from "./component/Notifications";
 import CustomerPayment from "./pages/CustomerPayment";
 
@@ -69,209 +68,117 @@ function App() {
             ================================= */}
 
             <Route element={<MainLayout />}>
-              <Route
-                path="/"
-                element={<Home />}
-              />
+              <Route path="/" element={<Home />} />
+
+              <Route path="/categories" element={<Categories />} />
+
+              <Route path="/product/:id" element={<ProductDetails />} />
+
+              <Route path="/cart" element={<Cart />} />
+
+              <Route path="/wishlist" element={<Wishlist />} />
+
+              <Route path="/category/:id" element={<CategoryProducts />} />
+
+              <Route path="/account" element={<Account />} />
+
+              <Route path="/payment" element={<CustomerPayment />} />
+
+              <Route path="/payment/:orderId" element={<CustomerPayment />} />
+
+              <Route path="/policies" element={<Policies />} />
+              <Route path="/policies/shipping&returns" element={<Policies />} />
 
               <Route
-                path="/categories"
-                element={<Categories />}
+                path="/policies/cancellation-refund"
+                element={<Policies />}
               />
 
-              <Route
-                path="/product/:id"
-                element={<ProductDetails />}
-              />
-
-              <Route
-                path="/cart"
-                element={<Cart />}
-              />
-
-              <Route
-                path="/wishlist"
-                element={<Wishlist />}
-              />
-
-              <Route
-                path="/category/:id"
-                element={<CategoryProducts />}
-              />
-
-              <Route
-                path="/account"
-                element={<Account />}
-              />
-
-              <Route
-                path="/payment"
-                element={<CustomerPayment />}
-              />
-
-              <Route
-                path="/payment/:orderId"
-                element={<CustomerPayment />}
-              />
+              <Route path="/contact" element={<Contact />} />
             </Route>
 
             {/* =================================
                 AUTHENTICATION
             ================================= */}
 
-            <Route
-              path="/login"
-              element={<Login />}
-            />
+            <Route path="/login" element={<Login />} />
 
-            <Route
-              path="/register"
-              element={<Register />}
-            />
+            <Route path="/register" element={<Register />} />
 
             {/* =================================
                 CHECKOUT / ORDERS
             ================================= */}
 
-            <Route
-              path="/checkout"
-              element={<Checkout />}
-            />
+            <Route path="/checkout" element={<Checkout />} />
 
-            <Route
-              path="/order-success/:id"
-              element={<OrderSuccess />}
-            />
+            <Route path="/order-success/:id" element={<OrderSuccess />} />
 
-            <Route
-              path="/order/:id"
-              element={<OrderDetails />}
-            />
+            <Route path="/order/:id" element={<OrderDetails />} />
 
-            <Route
-              path="/orders"
-              element={<MyOrders />}
-            />
+            <Route path="/orders" element={<MyOrders />} />
 
-            <Route
-              path="/notifications"
-              element={<Notifications />}
-            />
+            <Route path="/notifications" element={<Notifications />} />
 
             {/* =================================
                 PURCHASES
             ================================= */}
 
-            <Route
-              path="/purchase-success/:id"
-              element={<PurchaseSuccess />}
-            />
+            <Route path="/purchase-success/:id" element={<PurchaseSuccess />} />
 
-            <Route
-              path="/purchases/:id"
-              element={<PurchaseDetails />}
-            />
+            <Route path="/purchases/:id" element={<PurchaseDetails />} />
 
             {/* =================================
                 ADMIN DASHBOARD
             ================================= */}
 
-            <Route
-              path="/admin"
-              element={<AdminLayout />}
-            >
+            <Route path="/admin" element={<AdminLayout />}>
               {/* Dashboard */}
 
-              <Route
-                index
-                element={<AdminDashboard />}
-              />
+              <Route index element={<AdminDashboard />} />
 
               {/* Store */}
 
-              <Route
-                path="products"
-                element={<AdminProducts />}
-              />
+              <Route path="products" element={<AdminProducts />} />
 
-              <Route
-                path="categories"
-                element={<AdminCategories />}
-              />
+              <Route path="categories" element={<AdminCategories />} />
 
-              <Route
-                path="inventory"
-                element={<AdminInventory />}
-              />
+              <Route path="inventory" element={<AdminInventory />} />
 
-              <Route
-                path="orders"
-                element={<AdminOrders />}
-              />
+              <Route path="orders" element={<AdminOrders />} />
 
-              <Route
-                path="orders/:id"
-                element={<AdminOrderDetails />}
-              />
+              <Route path="orders/:id" element={<AdminOrderDetails />} />
 
-              <Route
-                path="shipping"
-                element={<AdminShipping />}
-              />
+              <Route path="shipping" element={<AdminShipping />} />
 
               {/* Customers */}
 
-              <Route
-                path="customers"
-                element={<AdminCustomers />}
-              />
+              <Route path="customers" element={<AdminCustomers />} />
 
               {/* Banner */}
 
-              <Route
-                path="banner"
-                element={<BannerManagement />}
-              />
+              <Route path="banner" element={<BannerManagement />} />
 
               {/* Reviews */}
 
-              <Route
-                path="reviews"
-                element={<AdminReviews />}
-              />
+              <Route path="reviews" element={<AdminReviews />} />
 
               {/* Marketing */}
 
-              <Route
-                path="discounts"
-                element={<AdminDiscounts />}
-              />
+              <Route path="discounts" element={<AdminDiscounts />} />
 
               {/* Finance */}
 
-              <Route
-                path="payments"
-                element={<AdminPayments />}
-              />
+              <Route path="payments" element={<AdminPayments />} />
 
               {/* Analytics */}
 
-              <Route
-                path="analytics"
-                element={<AdminAnalytics />}
-              />
+              <Route path="analytics" element={<AdminAnalytics />} />
 
               {/* Purchases */}
 
-              <Route
-                path="purchases"
-                element={<PurchaseOrders />}
-              />
+              <Route path="purchases" element={<PurchaseOrders />} />
 
-              <Route
-                path="purchases/:id"
-                element={<AdminPurchaseDetails />}
-              />
+              <Route path="purchases/:id" element={<AdminPurchaseDetails />} />
 
               <Route
                 path="purchases/:id/receiving"
@@ -280,10 +187,7 @@ function App() {
 
               {/* Settings */}
 
-              <Route
-                path="settings"
-                element={<AdminSettings />}
-              />
+              <Route path="settings" element={<AdminSettings />} />
             </Route>
           </Routes>
         </BrowserRouter>
@@ -293,4 +197,3 @@ function App() {
 }
 
 export default App;
-
