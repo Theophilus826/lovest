@@ -45,9 +45,9 @@ icon: <FaCreditCard />,
 path: "/payment",
 },
 {
-title: "Settings",
+title: "Setting",
 icon: <FaCog />,
-path: "/settings",
+path: "/setting",
 },
 ];
 

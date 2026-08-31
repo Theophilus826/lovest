@@ -32,6 +32,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 import Policies from "./pages/Policies";
 import Notifications from "./component/Notifications";
 import CustomerPayment from "./pages/CustomerPayment";
+import Setting from "./pages/Setting";
 
 // =====================================
 // ADMIN PAGES
@@ -122,6 +123,7 @@ function App() {
               <Route path="/orders" element={<MyOrders />} />
 
               <Route path="/notifications" element={<Notifications />} />
+                <Route path="setting" element={<Setting/>} />
 
               {/* =================================
                 PURCHASES
