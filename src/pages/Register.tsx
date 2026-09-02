@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { toast } from "react-toastify";
 
 import { registerUser, reset } from "../services/AuthSlice";
@@ -126,9 +127,11 @@ export default function Register() {
       window.location.replace("/");
     } catch (error) {
       toast.error(
-        typeof error === "string"
-          ? error
-          : "Registration failed. Please try again.",
+        axios.isAxiosError(error) && error.code === "ECONNABORTED"
+          ? "Server is waking up. Please try again in a moment."
+          : typeof error === "string"
+            ? error
+            : "Registration failed. Please try again.",
       );
     }
   };

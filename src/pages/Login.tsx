@@ -8,6 +8,7 @@ import {
 import {
   useNavigate,
 } from "react-router-dom";
+import axios from "axios";
 
 import {
   toast,
@@ -65,7 +66,11 @@ export default function Login() {
       window.location.replace("/");
     } catch (error) {
       toast.error(
-        typeof error === "string" ? error : "Login failed. Please try again.",
+        axios.isAxiosError(error) && error.code === "ECONNABORTED"
+          ? "Server is waking up. Please try again in a moment."
+          : typeof error === "string"
+            ? error
+            : "Login failed. Please try again.",
       );
     }
   };

@@ -4,7 +4,7 @@ const API = axios.create({
   baseURL: import.meta.env.DEV
     ? "http://localhost:5000/api"
     : "https://lovest-backend.onrender.com/api",
-  timeout: 15000,
+  timeout: 60000,
   withCredentials: true,
 });
 
@@ -26,6 +26,10 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.code === "ECONNABORTED") {
+      console.error("API request timed out:", error.config?.url);
+    }
+
     if (error.response?.status === 401) {
       console.error("Authentication failed.");
     }
