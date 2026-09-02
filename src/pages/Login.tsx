@@ -62,9 +62,11 @@ export default function Login() {
 
       toast.success("Login successful");
       dispatch(reset());
-      navigate("/", { replace: true });
+      window.location.replace("/");
     } catch (error) {
-      toast.error(typeof error === "string" ? error : "Login failed");
+      toast.error(
+        typeof error === "string" ? error : "Login failed. Please try again.",
+      );
     }
   };
 

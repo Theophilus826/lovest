@@ -123,10 +123,12 @@ export default function Register() {
 
       toast.success("Account created successfully");
       dispatch(reset());
-      navigate("/", { replace: true });
+      window.location.replace("/");
     } catch (error) {
       toast.error(
-        typeof error === "string" ? error : "Registration failed",
+        typeof error === "string"
+          ? error
+          : "Registration failed. Please try again.",
       );
     }
   };
