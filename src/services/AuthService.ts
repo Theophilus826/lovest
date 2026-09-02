@@ -41,11 +41,18 @@ const saveAuth = (data: any): AuthUser => {
   console.log("========== SAVE AUTH ==========");
   console.log("SAVE AUTH DATA:", data);
 
+  const authData = data?.user
+    ? {
+        ...data.user,
+        token: data.user.token ?? data.token,
+      }
+    : data;
+
   // ==========================================
   // CHECK RESPONSE
   // ==========================================
 
-  if (!data) {
+  if (!authData) {
     console.error("❌ SAVE AUTH: No response data");
 
     throw new Error(
@@ -53,10 +60,10 @@ const saveAuth = (data: any): AuthUser => {
     );
   }
 
-  if (!data.token) {
+  if (!authData.token) {
     console.error(
       "❌ SAVE AUTH: Token missing",
-      data,
+      authData,
     );
 
     throw new Error(
@@ -64,10 +71,10 @@ const saveAuth = (data: any): AuthUser => {
     );
   }
 
-  if (!data._id) {
+  if (!authData._id) {
     console.error(
       "❌ SAVE AUTH: User ID missing",
-      data,
+      authData,
     );
 
     throw new Error(
@@ -79,47 +86,45 @@ const saveAuth = (data: any): AuthUser => {
   // BUILD USER
   // ==========================================
 
-  const isAdmin =
-    data.isAdmin === true ||
-    data.role === "admin";
-
   const user: AuthUser = {
-    _id: String(data._id),
+    _id: String(authData._id),
 
     name:
-      typeof data.name === "string" &&
-      data.name.trim()
-        ? data.name
+      typeof authData.name === "string" &&
+      authData.name.trim()
+        ? authData.name
         : "User",
 
-    email: data.email ?? null,
+    email: authData.email ?? null,
 
-    phone: data.phone ?? null,
+    phone: authData.phone ?? null,
 
-    avatar: data.avatar ?? null,
+    avatar: authData.avatar ?? null,
 
-    token: String(data.token),
+    token: String(authData.token),
 
-    isAdmin,
+    isAdmin:
+      authData.isAdmin === true ||
+      authData.role === "admin",
 
-    role: isAdmin
+    role: authData.isAdmin === true || authData.role === "admin"
       ? "admin"
       : "user",
 
     coins:
-      typeof data.coins === "number"
-        ? data.coins
+      typeof authData.coins === "number"
+        ? authData.coins
         : 0,
 
     isVerified:
-      data.isVerified === true,
+      authData.isVerified === true,
 
     online:
-      data.online === true,
+      authData.online === true,
 
-    createdAt: data.createdAt,
+    createdAt: authData.createdAt,
 
-    updatedAt: data.updatedAt,
+    updatedAt: authData.updatedAt,
   };
 
   // ==========================================
