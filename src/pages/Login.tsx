@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { useState, type FormEvent } from "react";
 
 import {
   Eye,
@@ -35,57 +31,7 @@ export default function Login() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const {
-    user,
-    isLoading,
-    isSuccess,
-    isError,
-    message,
-  } = useAppSelector((state) => state.auth);
-
-  // ==========================================
-  // LOGIN RESULT
-  // ==========================================
-
-  useEffect(() => {
-    console.log("LOGIN STATE:", {
-      user,
-      isLoading,
-      isSuccess,
-      isError,
-      message,
-    });
-
-    if (isSuccess && user) {
-      console.log("LOGIN SUCCESS - NAVIGATING HOME");
-
-      toast.success("Login successful");
-
-      // Reset AFTER successful login state has been processed
-      dispatch(reset());
-
-      navigate("/", {
-        replace: true,
-      });
-
-      return;
-    }
-
-    if (isError && message) {
-      console.error("LOGIN ERROR:", message);
-
-      toast.error(message);
-
-      dispatch(reset());
-    }
-  }, [
-    user,
-    isSuccess,
-    isError,
-    message,
-    dispatch,
-    navigate,
-  ]);
+  const { isLoading } = useAppSelector((state) => state.auth);
 
   // ==========================================
   // SUBMIT
@@ -106,40 +52,19 @@ export default function Login() {
       return;
     }
 
-    console.log("LOGIN SUBMIT:", {
-      identifier: cleanIdentifier,
-      hasPassword: !!password,
-    });
-
     try {
-      const result = await dispatch(
+      await dispatch(
         loginUser({
           identifier: cleanIdentifier,
           password,
         }),
       ).unwrap();
 
-      console.log(
-        "LOGIN RESULT FROM THUNK:",
-        result,
-      );
-
-      console.log(
-        "TOKEN SAVED:",
-        localStorage.getItem("token"),
-      );
-
-      console.log(
-        "USER SAVED:",
-        localStorage.getItem("user"),
-      );
-
-      // Navigation is handled by the useEffect
+      toast.success("Login successful");
+      dispatch(reset());
+      navigate("/", { replace: true });
     } catch (error) {
-      console.error(
-        "LOGIN THUNK FAILED:",
-        error,
-      );
+      toast.error(typeof error === "string" ? error : "Login failed");
     }
   };
 

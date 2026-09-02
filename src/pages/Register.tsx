@@ -1,9 +1,4 @@
-import {
-  useState,
-  useEffect,
-  type ChangeEvent,
-  type FormEvent,
-} from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -25,13 +20,7 @@ export default function Register() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const {
-    user,
-    isLoading,
-    isSuccess,
-    isError,
-    message,
-  } = useAppSelector((state) => state.auth);
+  const { isLoading } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState<RegisterForm>({
     name: "",
@@ -45,32 +34,6 @@ export default function Register() {
 
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
-
-  // ==========================
-  // HANDLE AUTH STATE
-  // ==========================
-  useEffect(() => {
-    if (isError && message) {
-      toast.error(message);
-      dispatch(reset());
-      return;
-    }
-
-    if (isSuccess && user) {
-      toast.success("Account created successfully");
-
-      dispatch(reset());
-
-      navigate("/");
-    }
-  }, [
-    dispatch,
-    isError,
-    isSuccess,
-    message,
-    navigate,
-    user,
-  ]);
 
   // ==========================
   // HANDLE INPUT CHANGES
@@ -89,7 +52,7 @@ export default function Register() {
   // ==========================
   // HANDLE FORM SUBMISSION
   // ==========================
-  const onSubmit = (
+  const onSubmit = async (
     e: FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
@@ -148,14 +111,24 @@ export default function Register() {
     // ==========================
     // REGISTER USER
     // ==========================
-    dispatch(
-      registerUser({
-        name,
-        email,
-        password,
-        confirmPassword,
-      })
-    );
+    try {
+      await dispatch(
+        registerUser({
+          name,
+          email,
+          password,
+          confirmPassword,
+        })
+      ).unwrap();
+
+      toast.success("Account created successfully");
+      dispatch(reset());
+      navigate("/", { replace: true });
+    } catch (error) {
+      toast.error(
+        typeof error === "string" ? error : "Registration failed",
+      );
+    }
   };
 
   // ==========================
