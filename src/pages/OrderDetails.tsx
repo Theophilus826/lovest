@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -165,7 +165,7 @@ export default function OrderDetails() {
   // FETCH ORDER
   // =========================================================
 
-  const loadOrder = async (showLoading = true) => {
+  const loadOrder = useCallback(async (showLoading = true) => {
     if (!id) {
       setError("Order ID is missing.");
       setLoading(false);
@@ -270,7 +270,7 @@ export default function OrderDetails() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [id]);
 
   // =========================================================
   // INITIAL LOAD
@@ -278,7 +278,7 @@ export default function OrderDetails() {
 
   useEffect(() => {
     loadOrder(true);
-  }, [id]);
+  }, [loadOrder]);
 
   // =========================================================
   // AUTO REFRESH
@@ -306,6 +306,7 @@ export default function OrderDetails() {
     return () => clearInterval(interval);
   }, [
     id,
+    loadOrder,
     order?.status,
     order?.shippingStatus,
   ]);

@@ -33,6 +33,7 @@ import Policies from "./pages/Policies";
 import Notifications from "./component/Notifications";
 import CustomerPayment from "./pages/CustomerPayment";
 import Setting from "./pages/Setting";
+import PaymentCallback from "./pages/PaymentCallback";
 
 // =====================================
 // ADMIN PAGES
@@ -123,7 +124,7 @@ function App() {
               <Route path="/orders" element={<MyOrders />} />
 
               <Route path="/notifications" element={<Notifications />} />
-                <Route path="setting" element={<Setting/>} />
+              <Route path="setting" element={<Setting />} />
 
               {/* =================================
                 PURCHASES
@@ -136,6 +137,7 @@ function App() {
 
               <Route path="/purchases/:id" element={<PurchaseDetails />} />
 
+              <Route path="/payment/callback" element={<PaymentCallback />} />
               {/* =================================
                 ADMIN DASHBOARD
             ================================= */}

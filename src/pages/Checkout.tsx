@@ -136,11 +136,26 @@ export default function Checkout() {
       return;
     }
 
-    // =====================================
-    // CURRENT PURCHASE CONTROLLER
-    // SUPPORTS ONE PRODUCT PER PURCHASE
-    // =====================================
+    if (purchaseType === "FULL_PAYMENT") {
+      try {
+        setLoading(true);
+        await handleFullPayment();
+      } catch (error: any) {
+        console.error("Failed to create full-payment order:", error);
 
+        setError(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to create your order. Please try again.",
+        );
+      } finally {
+        setLoading(false);
+      }
+
+      return;
+    }
+
+    // Purchase plans currently support one product per purchase.
     if (cart.length !== 1) {
       setError(
         "Please checkout with one product at a time when using a purchase plan.",
@@ -257,6 +272,132 @@ export default function Checkout() {
     }
   };
 
+  // =====================================
+// CREATE ORDER + PAYSTACK PAYMENT
+// =====================================
+
+const handleFullPayment = async () => {
+  // =====================================
+  // PAYSTACK REQUIRES EMAIL
+  // =====================================
+
+  if (!form.email.trim()) {
+    throw new Error(
+      "Please enter your email address to pay online.",
+    );
+  }
+
+  // =====================================
+  // CREATE ORDER
+  // =====================================
+
+  const orderPayload = {
+    customer: {
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+    },
+
+    deliveryAddress: {
+      address: form.address.trim(),
+      city: form.city.trim(),
+      state: form.state.trim(),
+      country: "Nigeria",
+      postalCode: "",
+    },
+
+    items: cart.map((item) => {
+      const originalPrice = Number(
+        item.product.originalPrice || 0,
+      );
+
+      const price = Number(
+        item.product.price || 0,
+      );
+
+      return {
+        product: item.product._id,
+
+        name: item.product.name,
+
+        image: item.product.image || "",
+
+        originalPrice,
+
+        price,
+
+        quantity: item.quantity,
+
+        total: price * item.quantity,
+      };
+    }),
+
+    subtotal,
+
+    deliveryFee,
+
+    total,
+
+    paymentMethod: "online",
+  };
+
+  // =====================================
+  // CREATE ORDER
+  // =====================================
+
+  const orderResponse = await API.post(
+    "/orders",
+    orderPayload,
+  );
+
+  const order = orderResponse.data?.data;
+
+  if (!order?._id) {
+    throw new Error(
+      "Order was created but no order ID was returned.",
+    );
+  }
+
+  // =====================================
+  // SAVE ORDER ID
+  // =====================================
+
+  sessionStorage.setItem(
+    "lastOrderId",
+    order._id,
+  );
+
+  // =====================================
+  // INITIALIZE PAYSTACK
+  // =====================================
+
+  const paymentResponse = await API.post(
+    "/payments/paystack/initialize",
+    {
+      orderId: order._id,
+    },
+  );
+
+  const payment =
+    paymentResponse.data;
+
+  if (
+    !payment?.success ||
+    !payment?.authorization_url
+  ) {
+    throw new Error(
+      payment?.message ||
+        "Unable to initialize Paystack payment.",
+    );
+  }
+
+  // =====================================
+  // REDIRECT TO PAYSTACK
+  // =====================================
+
+  window.location.href =
+    payment.authorization_url;
+};
   // =====================================
   // EMPTY CART
   // =====================================
