@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import API from "../services/Api";
+import { useNotifications } from "../context/NotificationContext";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -240,6 +241,10 @@ export default function AdminLayout() {
   const location = useLocation();
 
   const [pendingPurchases, setPendingPurchases] = useState(0);
+  const {
+    notifications,
+    unreadCount: unreadNotificationCount,
+  } = useNotifications();
 
   useEffect(() => {
     let mounted = true;
@@ -702,7 +707,9 @@ export default function AdminLayout() {
 
                   <Bell size={20} />
 
-                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                  {unreadNotificationCount > 0 && (
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                  )}
 
                 </button>
 
@@ -717,38 +724,41 @@ export default function AdminLayout() {
                         Notifications
                       </h3>
 
-                      <span className="rounded-full bg-red-50 px-2 py-1 text-[10px] font-bold text-red-600">
-                        3 NEW
-                      </span>
+                      {unreadNotificationCount > 0 && (
+                        <span className="rounded-full bg-red-50 px-2 py-1 text-[10px] font-bold text-red-600">
+                          {unreadNotificationCount} NEW
+                        </span>
+                      )}
 
                     </div>
 
 
                     <div className="divide-y divide-slate-100">
-
-                      <NotificationItem
-                        icon={ShoppingBag}
-                        title="New order received"
-                        description="A new customer order requires attention."
-                        time="Recently"
-                      />
-
-
-                      <NotificationItem
-                        icon={Truck}
-                        title="Shipment update"
-                        description="A shipment has changed status."
-                        time="Recently"
-                      />
-
-
-                      <NotificationItem
-                        icon={CheckCircle}
-                        title="Receipt confirmed"
-                        description="A customer confirmed receipt of an order."
-                        time="Recently"
-                      />
-
+                      {notifications.length === 0 ? (
+                        <p className="px-4 py-8 text-center text-sm text-slate-500">
+                          No notifications yet.
+                        </p>
+                      ) : (
+                        notifications.slice(0, 5).map((notification) => (
+                          <NavLink
+                            key={notification._id}
+                            to={
+                              notification.orderId
+                                ? "/admin/orders"
+                                : "/admin"
+                            }
+                            onClick={closeDropdowns}
+                            className="block p-4 transition hover:bg-slate-50"
+                          >
+                            <p className="text-sm font-semibold text-slate-900">
+                              {notification.message}
+                            </p>
+                            <p className="mt-1 text-[10px] font-medium text-slate-400">
+                              {new Date(notification.createdAt).toLocaleString()}
+                            </p>
+                          </NavLink>
+                        ))
+                      )}
                     </div>
 
 
